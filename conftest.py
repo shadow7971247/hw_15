@@ -32,8 +32,8 @@ def setup_browser(request):
     if selenoid_url and not selenoid_url.startswith(('http://', 'https://')):
         selenoid_url = f"https://{selenoid_url}"
 
-    user = os.getenv("USER", "")
-    password = os.getenv("PASSWORD", "")
+    user = os.getenv("SELENOID_USER", "")
+    password = os.getenv("SELENOID_PASSWORD", "")
 
     if user and password:
         remote_url = selenoid_url.replace("://", f"://{user}:{password}@")
