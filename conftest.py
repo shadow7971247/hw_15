@@ -32,7 +32,7 @@ def setup_browser(request):
     if selenoid_url and not selenoid_url.startswith(('http://', 'https://')):
         selenoid_url = f"https://{selenoid_url}"
 
-    user = os.getenv("LOGIN", "")
+    user = os.getenv("USER", "")
     password = os.getenv("PASSWORD", "")
 
     if user and password:
