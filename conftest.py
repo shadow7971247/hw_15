@@ -11,12 +11,12 @@ load_dotenv()
 
 def pytest_addoption(parser):
     parser.addoption("--browser", default=os.getenv("BROWSER", "chrome"), choices=["chrome", "firefox"], help="Browser")
-    parser.addoption("--browser_version", default=os.getenv("BROWSER_VERSION", "128.0"), help="Browser version")
+    parser.addoption("--browser_version", default=os.getenv("BROWSER_VERSION", "128.0"), choices=["128.0", "125.0"], help="Browser version")
     parser.addoption("--headless", default=os.getenv("HEADLESS", "False"), help="Headless mode True/False")
     parser.addoption("--width", default=os.getenv("SCREEN_WIDTH", "1920"), help="Window width")
     parser.addoption("--height", default=os.getenv("SCREEN_HEIGHT", "1080"), help="Window height")
     parser.addoption("--base_url", default=os.getenv("BASE_URL", "https://www.kaspersky.ru"), help="Base URL")
-    parser.addoption("--selenoid_url", default=os.getenv("SELENOID_URL", "selenoid.autotests.cloud/wd/hub"), help="Selenoid URL")
+    parser.addoption("--selenoid_url", default=os.getenv("SELENOID_URL", ""), help="Selenoid URL (empty = local run)")
 
 
 @pytest.fixture(scope='function')
@@ -35,7 +35,7 @@ def setup_browser(request):
     user = os.getenv("SELENOID_USER", "")
     password = os.getenv("SELENOID_PASSWORD", "")
 
-    if user and password:
+    if selenoid_url and user and password:
         remote_url = selenoid_url.replace("://", f"://{user}:{password}@")
     else:
         remote_url = selenoid_url
@@ -54,23 +54,36 @@ def setup_browser(request):
     else:
         raise ValueError(f"Browser {browser_name} not supported")
 
-    selenoid_capabilities = {
-        "browserName": browser_name,
-        "browserVersion": browser_version,
-        "selenoid:options": {
-            "enableVNC": True,
-            "enableVideo": True
+    if not remote_url:
+        if browser_name == "chrome":
+            from selenium.webdriver.chrome.service import Service
+            from webdriver_manager.chrome import ChromeDriverManager
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+        elif browser_name == "firefox":
+            from selenium.webdriver.firefox.service import Service
+            from webdriver_manager.firefox import GeckoDriverManager
+            service = Service(GeckoDriverManager().install())
+            driver = webdriver.Firefox(service=service, options=options)
+        else:
+            raise ValueError(f"Browser {browser_name} not supported for local run")
+    else:
+        selenoid_capabilities = {
+            "browserName": browser_name,
+            "browserVersion": browser_version,
+            "selenoid:options": {
+                "enableVNC": True,
+                "enableVideo": True
+            }
         }
-    }
-    options.capabilities.update(selenoid_capabilities)
+        options.capabilities.update(selenoid_capabilities)
+        driver = webdriver.Remote(
+            command_executor=remote_url,
+            options=options
+        )
 
-    driver = webdriver.Remote(
-        command_executor=remote_url,
-        options=options
-    )
-
-    driver.implicitly_wait(30)
-    driver.set_page_load_timeout(60)
+    driver.implicitly_wait(15)
+    driver.set_page_load_timeout(20)
     driver.base_url = base_url
 
     yield driver

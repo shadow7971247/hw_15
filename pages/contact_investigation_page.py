@@ -9,7 +9,7 @@ class ContactInvestigationPage:
     def __init__(self, driver):
         self.driver = driver
         self.wait = WebDriverWait(driver, 15)
-
+#на данном этапе в селеноиде не прогружается форма хотя все пингуется и отображается в разных браузерах отлично
     def open(self) -> "ContactInvestigationPage":
         base_url = self.driver.base_url
         self.driver.get(f"{base_url}/enterprise-security/contact-investigation")
@@ -41,9 +41,10 @@ class ContactInvestigationPage:
         return self
 
     def set_name(self, value: str):
-        element = self.wait.until(
-            EC.presence_of_element_located((By.XPATH, "(//input[@type='text' or @type='string' or not(@type)])[1]"))
-        )
+        element = self.wait.until(EC.presence_of_element_located((By.NAME, "name")))
+        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+        time.sleep(0.5)
+        self.driver.execute_script("arguments[0].click();", element)
         element.clear()
         element.send_keys(value)
 
@@ -82,17 +83,19 @@ class ContactInvestigationPage:
     def select_help_required(self, value: str):
         help_field = self.driver.find_elements(By.XPATH, "//input[@readonly='readonly']")[2]
         help_field.click()
-        time.sleep(0.3)
+        time.sleep(0.5)
 
-        dropdown = self.driver.find_element(By.CLASS_NAME, "b24-form-dropdown")
+        scroll_container = self.driver.find_element(By.CSS_SELECTOR, ".b24-form-dropdown > div")
 
         while True:
             try:
-                dropdown.find_element(By.XPATH, f".//span[text()='{value}']").click()
+                option = self.driver.find_element(By.XPATH,
+                                                  f"//div[contains(@class, 'b24-form-dropdown')]//span[text()='{value}']")
+                option.click()
                 break
             except:
-                self.driver.execute_script("arguments[0].scrollTop += 50", dropdown)
-                time.sleep(0.2)
+                self.driver.execute_script("arguments[0].scrollTop += 50", scroll_container)
+                time.sleep(0.3)
 
     def select_incident_type(self, value: str):
         incident_field = self.driver.find_elements(By.XPATH, "//input[@readonly='readonly']")[3]

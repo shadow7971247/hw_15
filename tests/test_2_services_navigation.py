@@ -9,15 +9,22 @@ def test_navigation_to_products(driver):
     wait = WebDriverWait(driver, 15)
 
     business_button = wait.until(EC.element_to_be_clickable(
-        (By.XPATH, "//button[contains(text(), 'Для бизнеса') or contains(., 'Для бизнеса')]")
+        (By.XPATH, "//button[contains(text(), 'Для среднего бизнеса') or contains(text(), 'Для бизнеса')]")
     ))
     business_button.click()
-
     time.sleep(1)
-
-    small_business = wait.until(EC.element_to_be_clickable(
-        (By.XPATH, "//span[contains(@class, 'FullSectionItem_title') and contains(text(), 'Для малого бизнеса')]")
-    ))
-    small_business.click()
+#разные варианты поиска разных элементов сделаны из за разных версий сайта, которые открываются локально и через селеноид
+    try:
+        small_business = wait.until(EC.element_to_be_clickable(
+            (By.XPATH, "//div[contains(@class, 'HeaderBBB_mainMenuTabContentWrapperBg')]//a[contains(@href, 'small-business')]"
+            )
+        ))
+        small_business.click()
+    except:
+        small_business = wait.until(EC.element_to_be_clickable(
+            (By.XPATH, "//a[contains(@href, '/small-business-security')]")
+        ))
+        small_business.click()
 
     wait.until(EC.url_contains("small-business"))
+    assert "small-business" in driver.current_url
