@@ -111,5 +111,5 @@
 
 ## :ticket:Cкриншоты
 
-<img src="resources/allure report task15.JPG" width="600">
-<img src="resources/telegram report.JPG" width="600">
+<img src="media/allure report task15.JPG" width="600">
+<img src="media/telegram report.JPG" width="600">

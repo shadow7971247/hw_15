@@ -131,8 +131,8 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-#dont ignore resources/
-!resources/
+#dont ignore media/
+!media/
 !resources/*.jpg
 
 # Pyre type checker
