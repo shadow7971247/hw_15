@@ -1,6 +1,6 @@
 import allure
-from pages.contact_investigation_page import ContactInvestigationPage
 from models.contact_form import ContactFormData
+from pages.contact_investigation_page import ContactInvestigationPage
 
 
 @allure.feature("Форма обратной связи")
@@ -16,7 +16,7 @@ def test_captcha_appears_after_form_submission(driver):
         employees_count="1",
         help_required="Восстановление данных",
         incident_type="Уязвимость",
-        incident_details="тест заполнения формы"
+        incident_details="тест заполнения формы",
     )
 
     page = ContactInvestigationPage(driver)

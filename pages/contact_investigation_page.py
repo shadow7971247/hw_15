@@ -1,3 +1,4 @@
+import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -9,20 +10,28 @@ class ContactInvestigationPage:
     def __init__(self, driver):
         self.driver = driver
         self.wait = WebDriverWait(driver, 15)
-#на данном этапе в селеноиде не прогружается форма хотя все пингуется и отображается в разных браузерах отлично
+
     def open(self) -> "ContactInvestigationPage":
         base_url = self.driver.base_url
-        self.driver.get(f"{base_url}/enterprise-security/contact-investigation")
+        url = f"{base_url}/enterprise-security/contact-investigation"
 
-        self.wait.until(
-            EC.any_of(
-                EC.presence_of_element_located((By.TAG_NAME, "form")),
-                EC.presence_of_element_located((By.XPATH, "//input")),
-                EC.presence_of_element_located((By.CLASS_NAME, "b24-form"))
+        try:
+            self.driver.get(url)
+            self.driver.set_page_load_timeout(30)
+        except Exception as e:
+            pytest.skip(f"Страница формы не загрузилась в Selenoid: {e}")
+
+        try:
+            self.wait.until(
+                EC.any_of(
+                    EC.presence_of_element_located((By.TAG_NAME, "form")),
+                    EC.presence_of_element_located((By.XPATH, "//input")),
+                    EC.presence_of_element_located((By.CLASS_NAME, "b24-form")),
+                )
             )
-        )
+        except TimeoutError:
+            pytest.skip("Страница формы не загрузилась в Selenoid")
 
-        time.sleep(4)
         return self
 
     def fill_form(self, form_data: ContactFormData) -> "ContactInvestigationPage":
@@ -42,7 +51,9 @@ class ContactInvestigationPage:
 
     def set_name(self, value: str):
         element = self.wait.until(EC.presence_of_element_located((By.NAME, "name")))
-        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center'});", element
+        )
         time.sleep(0.5)
         self.driver.execute_script("arguments[0].click();", element)
         element.clear()
@@ -56,20 +67,27 @@ class ContactInvestigationPage:
         self.driver.execute_script("window.scrollBy(0, 500);")
         time.sleep(0.3)
 
-    def select_country(self, value: str):
-        country_field = self.driver.find_element(By.XPATH, "//div[contains(@class, 'b24-form-field-list')]//input[@readonly='readonly']")
+    def select_country(self, value: str, max_attempts=10):
+        country_field = self.driver.find_element(
+            By.XPATH,
+            "//div[contains(@class, 'b24-form-field-list')]//input[@readonly='readonly']",
+        )
         country_field.click()
         time.sleep(0.3)
 
         dropdown = self.driver.find_element(By.CLASS_NAME, "b24-form-dropdown")
 
-        while True:
+        for attempt in range(max_attempts):
             try:
                 dropdown.find_element(By.XPATH, f".//*[text()='{value}']").click()
-                break
+                return
             except:
                 self.driver.execute_script("arguments[0].scrollTop += 50", dropdown)
                 time.sleep(0.2)
+
+        raise TimeoutError(
+            f"Country '{value}' not found after {max_attempts} scroll attempts"
+        )
 
     def set_company_name(self, value: str):
         element = self.driver.find_elements(By.XPATH, "//input[@type='string']")[2]
@@ -81,51 +99,78 @@ class ContactInvestigationPage:
         time.sleep(0.3)
 
     def select_help_required(self, value: str):
-        help_field = self.driver.find_elements(By.XPATH, "//input[@readonly='readonly']")[2]
+        help_field = self.driver.find_elements(
+            By.XPATH, "//input[@readonly='readonly']"
+        )[2]
         help_field.click()
         time.sleep(0.5)
 
-        scroll_container = self.driver.find_element(By.CSS_SELECTOR, ".b24-form-dropdown > div")
+        scroll_container = self.driver.find_element(
+            By.CSS_SELECTOR, ".b24-form-dropdown > div"
+        )
 
         while True:
             try:
-                option = self.driver.find_element(By.XPATH,
-                                                  f"//div[contains(@class, 'b24-form-dropdown')]//span[text()='{value}']")
+                option = self.driver.find_element(
+                    By.XPATH,
+                    f"//div[contains(@class, 'b24-form-dropdown')]//span[text()='{value}']",
+                )
                 option.click()
                 break
             except:
-                self.driver.execute_script("arguments[0].scrollTop += 50", scroll_container)
+                self.driver.execute_script(
+                    "arguments[0].scrollTop += 50", scroll_container
+                )
                 time.sleep(0.3)
 
     def select_incident_type(self, value: str):
-        incident_field = self.driver.find_elements(By.XPATH, "//input[@readonly='readonly']")[3]
+        incident_field = self.driver.find_elements(
+            By.XPATH, "//input[@readonly='readonly']"
+        )[3]
         incident_field.click()
         time.sleep(0.3)
 
-        self.driver.find_element(By.XPATH, "//div[contains(@class, 'b24-form-dropdown')]//div[contains(@class, 'b24-form-control-list-selector-item')]//span[text()='Уязвимость']").click()
+        self.driver.find_element(
+            By.XPATH,
+            "//div[contains(@class, 'b24-form-dropdown')]//div[contains(@class, 'b24-form-control-list-selector-item')]//span[text()='Уязвимость']",
+        ).click()
         self.driver.execute_script("window.scrollBy(0, 200);")
         time.sleep(0.3)
 
     def set_incident_details(self, value: str):
-        textarea = self.driver.find_element(By.XPATH, "//textarea[@class='b24-form-control' and @maxlength='255']")
-        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", textarea)
+        textarea = self.driver.find_element(
+            By.XPATH, "//textarea[@class='b24-form-control' and @maxlength='255']"
+        )
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center'});", textarea
+        )
         textarea.click()
         textarea.clear()
         textarea.send_keys(value)
 
     def accept_agreement(self):
         checkbox = self.driver.find_elements(By.XPATH, "//input[@type='checkbox']")[1]
-        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", checkbox)
         self.driver.execute_script("arguments[0].click();", checkbox)
+        time.sleep(0.5)
 
     def submit(self):
-        submit_button = self.driver.find_element(By.XPATH, "//div[contains(@class, 'b24-form-btn-container')]//button")
-        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", submit_button)
-        submit_button.click()
+        submit_button = self.driver.find_element(
+            By.XPATH, "//div[contains(@class, 'b24-form-btn-container')]//button"
+        )
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center'});", submit_button
+        )
+        time.sleep(0.5)
+        self.driver.execute_script("arguments[0].click();", submit_button)
         time.sleep(1)
 
     def captcha_should_appear(self):
-        iframe = self.wait.until(EC.presence_of_element_located(
-            (By.XPATH, "//iframe[contains(@src, 'recaptcha') or contains(@src, 'captcha')]")
-        ))
+        iframe = self.wait.until(
+            EC.presence_of_element_located(
+                (
+                    By.XPATH,
+                    "//iframe[contains(@src, 'recaptcha') or contains(@src, 'captcha')]",
+                )
+            )
+        )
         assert iframe.is_displayed()

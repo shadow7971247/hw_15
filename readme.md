@@ -35,13 +35,11 @@
 
 ## :hammer_and_wrench: Технологии
 
-<p allign="left">
-<img allign="center" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-plain-wordmark.svg" height="40" width="40" />
-<img allign="center" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/selenium/selenium-original.svg" height="40" width="40" />
-<img allign="center" src="ttps://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/pytest/pytest-plain-wordmark.svg" height="40" width="40" />
-<img allign="center" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-line.svg" height="40" width="40" />
-              
-        
+| Python | Selenium | Pytest | Jenkins | Allure |
+|--------|----------|--------|---------|--------|
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-plain-wordmark.svg" height="40" width="40"> | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/selenium/selenium-original.svg" height="40" width="40"> | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/pytest/pytest-plain-wordmark.svg" height="40" width="40"> | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-line.svg" height="40" width="40"> | <img src="https://avatars.githubusercontent.com/u/5879127?s=200&v=4" height="40" width="40"> |           
+   
+     
 ---
 
 ## :arrow_forward: Запуск тестов
