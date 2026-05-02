@@ -109,5 +109,7 @@
 
 ## :ticket:Cкриншоты
 
-<img src="media/allure report task15.JPG" width="600">
-<img src="media/telegram report.JPG" width="600">
+<img src="media/allure_all.JPG" width="1080">
+<img src="media/telegram.JPG" width="1080">
+<img src="media/allure.JPG" width="1080">
+<img src="media/testops.JPG" width="1080">
